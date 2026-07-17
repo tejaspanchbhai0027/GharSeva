@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: gharseva_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: gharseva
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gharseva_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: gharseva_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - gharseva_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gharseva_backend
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_password@postgres:5432/gharseva
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gharseva_network
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gharseva_celery
+    restart: always
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/code
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_password@postgres:5432/gharseva
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - gharseva_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gharseva_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/code
+      - /code/node_modules
+    depends_on:
+      - backend
+    networks:
+      - gharseva_network
+
+volumes:
+  postgres_data:
+
+networks:
+  gharseva_network:
+    driver: bridge
