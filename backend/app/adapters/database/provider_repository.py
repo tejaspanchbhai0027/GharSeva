@@ -26,8 +26,15 @@ class ProviderRepository(ProviderRepo):
         self,
         category_id: Optional[UUID] = None,
         experience_min: Optional[int] = None,
-        rating_min: Optional[float] = None
-    ) -> List[ServiceProvider]:
+        rating_min: Optional[float] = None,
+        search: Optional[str] = None,
+        sort_by: str = "rating",
+        sort_order: str = "desc",
+        limit: int = 10,
+        offset: int = 0
+    ) -> tuple[List[ServiceProvider], int]:
+        from sqlalchemy import or_, desc, asc
+
         query = self.db.query(ServiceProvider).join(User, User.user_id == ServiceProvider.user_id)
         # Only active users who are verified providers
         query = query.filter(
@@ -47,7 +54,31 @@ class ProviderRepository(ProviderRepo):
         if rating_min is not None:
             query = query.filter(ServiceProvider.avg_rating >= rating_min)
 
-        return query.all()
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(
+                or_(
+                    User.full_name.ilike(search_term),
+                    ServiceProvider.bio.ilike(search_term)
+                )
+            )
+
+        total_count = query.count()
+
+        if sort_by == "rating":
+            order_col = ServiceProvider.avg_rating
+        elif sort_by == "experience":
+            order_col = ServiceProvider.experience_years
+        else:
+            order_col = ServiceProvider.avg_rating # Default
+
+        if sort_order == "asc":
+            query = query.order_by(asc(order_col))
+        else:
+            query = query.order_by(desc(order_col))
+
+        providers = query.offset(offset).limit(limit).all()
+        return providers, total_count
 
     def get_provider_availability(self, provider_id: UUID) -> List[ProviderAvailability]:
         return self.db.query(ProviderAvailability).filter(
@@ -82,3 +113,8 @@ class ProviderRepository(ProviderRepo):
 
     def get_address_by_id(self, address_id: UUID) -> Optional[Address]:
         return self.db.query(Address).filter(Address.address_id == address_id).first()
+
+    def get_provider_services(self, provider_id: UUID) -> List[Service]:
+        return self.db.query(Service).join(
+            ProviderService, ProviderService.service_id == Service.service_id
+        ).filter(ProviderService.provider_id == provider_id).all()

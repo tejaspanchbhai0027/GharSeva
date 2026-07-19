@@ -17,10 +17,14 @@ class SQLAlchemyServiceRepository(ServiceRepository):
         category_id: Optional[str] = None,
         search_query: Optional[str] = None,
         price_min: Optional[float] = None,
-        price_max: Optional[float] = None
+        price_max: Optional[float] = None,
+        is_featured: Optional[bool] = None
     ) -> List[Service]:
         query = self.session.query(Service)
         
+        if is_featured is not None:
+            query = query.filter(Service.is_featured == is_featured)
+            
         if category_id:
             query = query.filter(Service.category_id == category_id)
             

@@ -11,7 +11,8 @@ class ServiceRepository(Protocol):
         category_id: Optional[str] = None,
         search_query: Optional[str] = None,
         price_min: Optional[float] = None,
-        price_max: Optional[float] = None
+        price_max: Optional[float] = None,
+        is_featured: Optional[bool] = None
     ) -> List[Service]:
         """Fetch services based on filters and search."""
         ...

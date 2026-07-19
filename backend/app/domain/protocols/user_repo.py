@@ -35,3 +35,11 @@ class UserRepo(ABC):
     @abstractmethod
     def create_provider_profile(self, provider: ServiceProvider) -> ServiceProvider:
         pass
+
+    @abstractmethod
+    def get_addresses_by_user_id(self, user_id: UUID) -> List[Any]:
+        pass
+
+    @abstractmethod
+    def create_address(self, address: Any) -> Any:
+        pass

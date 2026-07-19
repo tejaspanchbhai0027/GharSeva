@@ -1,0 +1,888 @@
+﻿Total Pages: 34
+--- PAGE 1 ---
+GharSeva
+AI-Powered Home Services Marketplace
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+SOFTWARE PROJECT DOCUMENTATION
+Master of Computer Applications (MCA)
+Technology Stack
+React.js + Tailwind CSS  |  FastAPI (Python)  |  PostgreSQL  |  JWT  |  SQLAlchemy
+Document Version: 1.0
+Date: July 1, 2026
+Status: Final
+Confidential ΓÇô For Academic & Professional Use
+GharSeva Documentation  |  Page 1 of 34
+--- PAGE 2 ---
+2. Table of Contents
+3.  Executive Summary 3
+4.  Business Requirement Document (BRD) 4
+5.  Software Requirement Specification (SRS) 5
+6.  Stakeholder Analysis 6
+7.  Functional Requirements 7
+8.  Non-Functional Requirements 8
+9.  User Roles and Permissions 9
+10.  User Stories10
+11.  Use Cases11
+12.  System Scope12
+13.  Assumptions and Constraints 13
+14.  System Architecture Description 14
+15.  Database Design 15
+16.  Entity Relationship Diagram Description 16
+17.  API Specification 17
+18.  UI/UX Screen List 18
+19.  Security Requirements 19
+20.  Testing Strategy 20
+21.  Deployment Strategy 21
+22.  Future Scope22
+23.  Success Metrics23
+24.  Conclusion24
+GharSeva Documentation  |  Page 2 of 34
+--- PAGE 3 ---
+3. Executive Summary
+GharSeva is an AI-powered home services marketplace designed to bridge the gap between homeowners  
+seeking reliable service professionals and skilled workers looking for consistent employment opportunities.  
+The platform leverages modern artificial intelligence and machine learning techniques to intelligently match  
+service requests with qualified providers, automate scheduling, predict demand, and ensure quality outcomes  
+through data-driven feedback loops.
+The home services industry in India is valued at over USD 5 billion and is growing at a CAGR of approximately  
+20%. Despite significant demand, the sector remains highly fragmented, unorganized, and prone to trust and  
+quality issues. GharSeva addresses these pain points by offering a transparent, technology-driven marketplace  
+that empowers customers and professionals alike.
+3.1 Key Highlights
+Dimension Detail
+Platform Type Web-based Marketplace (Mobile-Responsive)
+Core AI Feature Smart service provider matching using preference scoring
+Target Audience Urban homeowners and certified home service professionals
+Primary Geography India (Tier-1 and Tier-2 cities)
+Monetization Commission per booking + Premium provider listings
+Compliance GDPR-aligned data practices, JWT-secured APIs
+The system is built using a modern, cloud-native technology stack including React.js with Tailwind CSS for the  
+frontend, FastAPI for a high-performance Python backend, PostgreSQL for relational data management,  
+SQLAlchemy as the ORM, and JWT for secure stateless authentication. The architecture is designed for  
+horizontal scalability and cloud deployment on AWS or GCP.
+GharSeva Documentation  |  Page 3 of 34
+--- PAGE 4 ---
+4. Business Requirement Document (BRD)
+4.1 Business Background
+India's home services market is dominated by unorganized local vendors, word-of-mouth referrals, and  
+informal labor markets. Customers face challenges in finding vetted, reliable professionals, while skilled  
+workers struggle with inconsistent work pipelines. Digital aggregators have begun addressing this gap, but few  
+leverage AI for intelligent matching and quality control.
+4.2 Business Objectives
+  Γû╕Create a trusted digital marketplace connecting homeowners with verified service professionals.
+  Γû╕Reduce booking friction by enabling customers to book services in under three minutes.
+  Γû╕Leverage AI to match customers with the most suitable provider based on availability, ratings, location, 
+and specialty.
+  Γû╕Provide service professionals with a consistent, reliable workflow and tools for self-management.
+  Γû╕Generate revenue through service commissions and optional premium memberships for professionals.
+  Γû╕Establish a quality assurance loop via post-service ratings, reviews, and dispute resolution.
+4.3 Business Scope
+The GharSeva platform will cover the following service verticals in its initial release:
+Service Category Examples Complexity
+Cleaning Home cleaning, deep cleaning, sofa/carpet 
+cleaningLow
+Plumbing Leak repair, pipe fitting, drain unclogging Medium
+Electrical Wiring, appliance repair, switchboard installation Medium-High
+Carpentry Furniture repair, custom woodwork, 
+door/window fixesMedium
+Painting Interior/exterior painting, wall texturing Medium
+Pest Control General pest control, termite treatment Medium
+Appliance Repair AC, refrigerator, washing machine servicing High
+Gardening Lawn mowing, pruning, plant care Low
+4.4 Business Assumptions
+  Γû╕Internet penetration in target cities is adequate for platform adoption.
+  Γû╕Payment gateways (Razorpay/Stripe) are available for digital transactions.
+  Γû╕Service professionals can be onboarded with ID, skill, and background verification.
+  Γû╕The MVP will be launched in three metro cities before a pan-India rollout.
+4.5 Business Constraints
+  Γû╕Budget and timeline are limited to MCA project scope for the MVP phase.
+  Γû╕Third-party background verification integration is dependent on external API availability.
+GharSeva Documentation  |  Page 4 of 34
+--- PAGE 5 ---
+  Γû╕Regulatory compliance with local labor laws for gig workers must be observed.
+4.6 Success Criteria
+KPI Target (6 Months Post-Launch)
+Monthly Active Users (MAU) 10,000+
+Service Bookings/Month 5,000+
+Provider Acceptance Rate > 80%
+Customer Satisfaction Score > 4.2 / 5.0
+Booking Completion Rate > 90%
+Average Booking Time < 3 minutes
+GharSeva Documentation  |  Page 5 of 34
+--- PAGE 6 ---
+5. Software Requirement Specification (SRS)
+5.1 Introduction
+This  Software  Requirement  Specification  (SRS)  document  describes  the  functional  and  non-functional  
+requirements for the GharSeva AI-Powered Home Services Marketplace. It follows IEEE 830 SRS standards and  
+serves as the primary reference for the development, testing, and deployment teams.
+5.2 Overall Description
+5.2.1 Product Perspective
+GharSeva is a standalone web application with mobile-responsive design. It interacts with third-party services  
+including a payment gateway, SMS/email notification service, and mapping API (Google Maps). It exposes a  
+RESTful API consumed by the frontend and potentially by future mobile clients.
+5.2.2 Product Functions
+  Γû╕User registration, authentication, and profile management.
+  Γû╕Service listing, search, filtering, and booking.
+  Γû╕AI-powered provider matching and recommendation.
+  Γû╕Real-time booking status tracking.
+  Γû╕Secure payment processing.
+  Γû╕Ratings, reviews, and dispute resolution.
+  Γû╕Admin dashboard for platform management.
+  Γû╕Notifications via email and SMS.
+5.2.3 User Classes and Characteristics
+User Class Characteristics Technical Proficiency
+Customer Homeowner seeking services, 25ΓÇô55 age group Basic to Moderate
+Service Provider Skilled professional, may be less tech-savvy Basic
+Admin Platform operator, manages users and content High
+Support Agent Handles disputes and customer queries Moderate
+5.3 External Interface Requirements
+5.3.1 User Interfaces
+  Γû╕Responsive web application built with React.js and Tailwind CSS.
+  Γû╕Consistent design system with accessible color contrast ratios (WCAG 2.1 AA).
+  Γû╕Support for modern browsers: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+.
+5.3.2 Software Interfaces
+Interface Purpose Protocol
+Razorpay API Payment processing HTTPS/REST
+Twilio / MSG91 SMS notifications HTTPS/REST
+SendGrid Email notifications HTTPS/REST
+Google Maps API Location services and geocoding HTTPS/REST
+GharSeva Documentation  |  Page 6 of 34
+--- PAGE 7 ---
+Interface Purpose Protocol
+AWS S3 / Cloudinary Media and document storage HTTPS/REST
+Background Verification API Provider KYC verification HTTPS/REST
+GharSeva Documentation  |  Page 7 of 34
+--- PAGE 8 ---
+6. Stakeholder Analysis
+A comprehensive stakeholder analysis ensures that all parties with interest in or influence over the GharSeva  
+platform are identified, their expectations understood, and their engagement strategy defined.
+StakeholderRole Interest InfluenceEngagement Strategy
+CustomersEnd users booking 
+servicesReliable, affordable, 
+convenient serviceHighUser research, beta 
+testing, feedback 
+loops
+Service ProvidersProfessionals 
+delivering servicesConsistent income, fair 
+commission, toolsHighOnboarding training, 
+support portal
+Platform AdminOperations team Platform health, 
+revenue, complianceVery HighReal-time 
+dashboards, alerts
+Investors/SponsorsProject funding ROI, growth metrics, 
+market shareHighPeriodic reports, KPI 
+dashboards
+MCA FacultyAcademic evaluators Technical rigor, 
+documentation qualityMediumFull documentation, 
+demo sessions
+Payment GatewayRazorpay integration Successful transactions, 
+complianceMediumAPI integration, 
+sandbox testing
+Regulatory BodiesGovernment/labor 
+lawsGig worker rights, tax 
+complianceMediumLegal review, policy 
+compliance docs
+Support TeamDispute resolution Resolution SLAs, 
+customer satisfactionLow-MediumTicketing system, 
+escalation matrix
+GharSeva Documentation  |  Page 8 of 34
+--- PAGE 9 ---
+7. Functional Requirements
+7.1 Authentication & User Management
+FR-IDRequirement Priority
+FR-01The system shall allow new users to register using email and password. Must
+FR-02The system shall support OAuth 2.0 social login (Google). Should
+FR-03The system shall issue JWT access tokens and refresh tokens upon successful 
+login.Must
+FR-04The system shall invalidate tokens upon logout. Must
+FR-05The system shall enforce email verification before account activation. Must
+FR-06The system shall support password reset via OTP sent to registered email. Must
+FR-07The system shall allow users to update profile information, photo, and address. Must
+FR-08The system shall support role-based access (Customer, Provider, Admin, 
+Support).Must
+7.2 Service Browsing & Search
+FR-IDRequirement Priority
+FR-09The system shall display a categorized list of all available home services. Must
+FR-10The system shall allow full-text search with keyword suggestions. Must
+FR-11The system shall support filtering by service type, price range, availability, and 
+rating.Must
+FR-12The system shall display service provider profiles including ratings, experience, 
+and portfolio.Must
+FR-13The system shall provide AI-powered recommendations based on user history 
+and preferences.Should
+FR-14The system shall display real-time provider availability on a calendar view. Must
+7.3 Booking Management
+FR-IDRequirement Priority
+FR-15The system shall allow customers to create, view, modify, and cancel service 
+bookings.Must
+FR-16The system shall notify the provider upon new booking request creation. Must
+FR-17The system shall allow providers to accept or reject booking requests. Must
+FR-18The system shall track booking status through defined states: Pending, 
+Confirmed, In-Progress, Completed, Cancelled.Must
+GharSeva Documentation  |  Page 9 of 34
+--- PAGE 10 ---
+FR-IDRequirement Priority
+FR-19The system shall support scheduling for same-day, next-day, or future 
+bookings.Must
+FR-20The system shall send automated reminders 24 hours and 1 hour before the 
+service.Should
+FR-21The system shall calculate and display a transparent cost estimate before 
+booking confirmation.Must
+7.4 Payment
+FR-IDRequirement Priority
+FR-22The system shall process payments through Razorpay gateway (cards, UPI, 
+netbanking).Must
+FR-23The system shall generate and store digital invoices for each completed 
+transaction.Must
+FR-24The system shall support partial advance payments and post-service balance 
+settlement.Should
+FR-25The system shall process refunds within 5ΓÇô7 business days for cancellations per  
+policy.Must
+FR-26The system shall maintain a wallet for providers to track earnings and request 
+withdrawals.Should
+7.5 Ratings & Reviews
+FR-IDRequirement Priority
+FR-27The system shall allow customers to rate and review providers after service 
+completion.Must
+FR-28The system shall calculate and display a rolling average rating for each 
+provider.Must
+FR-29The system shall allow providers to respond to reviews. Should
+FR-30The system shall allow admins to flag and remove abusive reviews. Must
+7.6 Admin Dashboard
+FR-IDRequirement Priority
+FR-31The system shall provide admins with a dashboard showing platform-wide 
+KPIs.Must
+FR-32The system shall allow admins to approve, suspend, or ban user accounts. Must
+FR-33The system shall allow admins to manage service categories and pricing rules. Must
+GharSeva Documentation  |  Page 10 of 34
+--- PAGE 11 ---
+FR-IDRequirement Priority
+FR-34The system shall provide reporting tools for bookings, revenue, and provider 
+performance.Must
+FR-35The system shall allow admins to resolve disputes and issue manual refunds. Must
+GharSeva Documentation  |  Page 11 of 34
+--- PAGE 12 ---
+8. Non-Functional Requirements
+NFR-IDCategory Requirement Metric
+NFR-01Performance API response time for standard queries < 200ms (p95)
+NFR-02Performance Page load time (First Contentful Paint) < 2 seconds on 4G
+NFR-03Scalability Concurrent active users supported > 5,000 concurrent
+NFR-04Scalability Horizontal scaling of API tier Via containerization
+NFR-05Availability Platform uptime SLA 99.9% (< 8.7 hrs/year 
+downtime)
+NFR-06Security Data in transit encryption TLS 1.3 mandatory
+NFR-07Security Data at rest encryption AES-256 for PII fields
+NFR-08Security Authentication token expiry Access: 15 min; 
+Refresh: 7 days
+NFR-09Reliability Database backup frequency Daily full + hourly 
+incremental
+NFR-10Reliability Recovery Time Objective (RTO) < 4 hours
+NFR-11Reliability Recovery Point Objective (RPO) < 1 hour
+NFR-12Maintainability Code test coverage > 80% unit test 
+coverage
+NFR-13Usability WCAG accessibility compliance Level AA
+NFR-14Compliance Data privacy standard GDPR-aligned 
+practices
+NFR-15Portability Browser compatibility Chrome, Firefox, 
+Safari, Edge (latest 2 
+versions)
+GharSeva Documentation  |  Page 12 of 34
+--- PAGE 13 ---
+9. User Roles and Permissions
+9.1 Role Hierarchy
+GharSeva implements a four-tier role hierarchy with granular permission control. Roles are embedded in the  
+JWT payload and validated on every protected API endpoint.
+Permission CustomerProviderSupport AgentAdmin
+Register / Login Γ£öΓ£öΓ£öΓ£ö
+Browse Services Γ£öΓ£öΓ£öΓ£ö
+Create Booking Γ£öΓ£ùΓ£ùΓ£ö
+Accept/Reject Booking Γ£ùΓ£öΓ£ùΓ£ö
+Process Payments Γ£öΓ£ùΓ£ùΓ£ö
+View Own Profile Γ£öΓ£öΓ£öΓ£ö
+Edit Own Profile Γ£öΓ£öΓ£öΓ£ö
+Submit Reviews  (post-Γ£ö
+service)Γ£ùΓ£ùΓ£ù
+Respond to Reviews Γ£ùΓ£öΓ£ùΓ£ö
+Manage Service Listings Γ£ù (own)Γ£öΓ£ùΓ£ö
+Access Admin Dashboard Γ£ùΓ£ùPartialΓ£ö
+Manage User Accounts Γ£ùΓ£ùΓ£ùΓ£ö
+Generate Reports Γ£ùΓ£ùΓ£ùΓ£ö
+Resolve Disputes Γ£ùΓ£ùΓ£öΓ£ö
+Issue Refunds Γ£ùΓ£ùΓ£ùΓ£ö
+GharSeva Documentation  |  Page 13 of 34
+--- PAGE 14 ---
+10. User Stories
+10.1 Customer Stories
+Story IDAs a...I want to... So that...
+US-C01CustomerRegister and verify my email I can securely access the platform
+US-C02CustomerSearch for plumbers near my location I can find available help quickly
+US-C03CustomerView a provider's profile, ratings, and 
+reviewsI can make an informed booking 
+decision
+US-C04CustomerBook a service for a specific date and 
+time slotI can plan around my schedule
+US-C05CustomerPay securely using UPI or credit card I can complete the transaction 
+without risk
+US-C06CustomerTrack the real-time status of my 
+bookingI know when the provider will 
+arrive
+US-C07CustomerRate and review the service provider I can share feedback to help 
+others
+US-C08CustomerCancel a booking and receive a refund I am not penalized for last-minute 
+changes
+10.2 Service Provider Stories
+Story IDAs a...I want to... So that...
+US-P01ProviderRegister and upload my credentials I can be verified and onboarded to  
+the platform
+US-P02ProviderSet my availability calendar Customers can book me at 
+convenient times
+US-P03ProviderReceive notifications for new booking 
+requestsI can respond promptly to 
+opportunities
+US-P04ProviderView my earnings dashboard I can track income and request 
+withdrawals
+US-P05ProviderRespond to customer reviews I can address feedback 
+professionally
+US-P06ProviderMark a job as completed The system updates status and 
+releases payment
+10.3 Admin Stories
+Story IDAs a...I want to... So that...
+US-A01AdminView platform-wide booking and 
+revenue metricsI can monitor platform health in 
+real time
+GharSeva Documentation  |  Page 14 of 34
+--- PAGE 15 ---
+Story IDAs a...I want to... So that...
+US-A02AdminApprove or reject provider onboarding 
+applicationsOnly verified professionals join the  
+platform
+US-A03AdminSuspend abusive users or providers Platform integrity is maintained
+US-A04AdminManually issue a refund for a disputed 
+transactionCustomer trust is preserved
+US-A05AdminGenerate weekly performance reports I can make data-driven business 
+decisions
+GharSeva Documentation  |  Page 15 of 34
+--- PAGE 16 ---
+11. Use Cases
+11.1 Use Case: Book a Home Service
+Field Detail
+Use Case ID UC-001
+Use Case Name Book a Home Service
+Actor Customer
+Precondition Customer is registered, email-verified, and logged in.
+Trigger Customer selects a service category and initiates a booking.
+Main Flow 1. Customer searches for a service. 2. System displays matching providers. 3. 
+Customer selects a provider and views profile. 4. Customer selects date, time, 
+and address. 5. System displays cost estimate. 6. Customer confirms booking 
+and proceeds to payment. 7. Payment is processed via Razorpay. 8. System 
+creates booking record with status 'Pending'. 9. Provider receives notification. 
+10. Provider accepts booking; status changes to 'Confirmed'. 11. Customer and 
+provider receive confirmation with details.
+Alternative Flow AF1: Provider rejects ΓÇô System notifies customer and offers re-matching. AF2: 
+Payment fails ΓÇô Booking is not created; customer is notified to retry.
+Postcondition Booking is confirmed; payment is captured; notifications sent.
+Exception If no providers are available, system suggests alternative dates.
+11.2 Use Case: Provider Onboarding
+Field Detail
+Use Case ID UC-002
+Use Case Name Service Provider Onboarding
+Actor Service Provider, Admin
+Precondition Provider has a valid government-issued ID and service skill certifications.
+Trigger Provider submits onboarding application via the registration form.
+Main Flow 1. Provider registers with email and password. 2. Provider fills profile: name, 
+skills, service areas, experience. 3. Provider uploads ID proof and skill 
+certificates. 4. System stores application in 'Under Review' status. 5. Admin 
+reviews the application and documents. 6. Admin approves; provider receives 
+activation email. 7. Provider sets availability and starts accepting bookings.
+Alternative Flow Admin rejects with reason; provider can re-apply after corrections.
+Postcondition Provider account is active and discoverable in the marketplace.
+GharSeva Documentation  |  Page 16 of 34
+--- PAGE 17 ---
+11.3 Use Case: AI-Powered Provider Matching
+Field Detail
+Use Case ID UC-003
+Use Case Name AI Provider Matching
+Actor System (Automated), Customer
+Precondition Customer has specified service type, location, and preferred date/time.
+Trigger Customer initiates a service search or requests auto-match.
+Main Flow 1. System receives search parameters. 2. AI module filters providers by: 
+availability, service category, geographic proximity (< 10 km), and minimum 
+rating threshold (> 3.5). 3. Providers are scored using a weighted algorithm: 
+Rating (30%), Distance (25%), Completion Rate (25%), Response Time (20%). 4. 
+Top 5 matches are returned, ranked by score. 5. Customer selects preferred 
+provider.
+Postcondition Customer is presented with ranked provider recommendations.
+GharSeva Documentation  |  Page 17 of 34
+--- PAGE 18 ---
+12. System Scope
+12.1 In Scope
+The following capabilities are included in the GharSeva MVP:
+  Γû╕Web-based platform accessible via desktop and mobile browsers.
+  Γû╕Eight home service categories as defined in Section 4.3.
+  Γû╕Customer and provider registration with email verification.
+  Γû╕AI-powered search and provider matching engine.
+  Γû╕Booking lifecycle management (create, track, complete, cancel).
+  Γû╕Secure payment integration with Razorpay.
+  Γû╕Post-service ratings and reviews.
+  Γû╕Admin dashboard for user management and reporting.
+  Γû╕Notification system (email + SMS).
+  Γû╕Responsive UI supporting mobile and desktop.
+12.2 Out of Scope
+The following are explicitly excluded from the current release:
+  Γû╕Native iOS and Android mobile applications.
+  Γû╕Live video consultation feature.
+  Γû╕Multi-language support (Phase 2 roadmap).
+  Γû╕Subscription-based service plans for customers.
+  Γû╕AI-based automated pricing engine.
+  Γû╕Integration with IoT smart home devices.
+  Γû╕In-app messaging and real-time chat between customer and provider.
+GharSeva Documentation  |  Page 18 of 34
+--- PAGE 19 ---
+13. Assumptions and Constraints
+13.1 Assumptions
+IDAssumption
+A-01Users have access to internet connectivity with minimum 2G speed.
+A-02Service providers possess a smartphone or access to a web browser.
+A-03Payment gateway Razorpay is available and operational in all target geographies.
+A-04Google Maps API will provide accurate geocoding for Indian pin codes.
+A-05Third-party background verification API will respond within 48 hours for KYC checks.
+A-06Email and SMS delivery rates will exceed 95% in target markets.
+A-07All monetary transactions are in Indian Rupees (INR) for the MVP.
+A-08PostgreSQL database version 14+ is available in the production environment.
+13.2 Constraints
+IDConstraint
+C-01The project must be completed within the MCA academic timeline (6 months).
+C-02Frontend must support browsers released within the last 2 major versions.
+C-03The system must comply with the Information Technology Act, 2000 (India).
+C-04API rate limits imposed by third-party services (Google Maps: 1000 req/day on free tier).
+C-05The initial deployment budget is constrained to available cloud free-tier resources.
+C-06The MVP will only support English language content.
+C-07JWT secret keys must be rotated every 90 days per security policy.
+C-08File uploads are limited to 5MB per file for provider documents.
+GharSeva Documentation  |  Page 19 of 34
+--- PAGE 20 ---
+14. System Architecture Description
+14.1 Architectural Overview
+GharSeva  follows  a  layered,  microservice-ready  monolithic  architecture  for  the  MVP  phase,  with  clear  
+separation of concerns across presentation, business logic, and data layers. The architecture is designed for  
+progressive decomposition into microservices as the platform scales.
+14.2 Architecture Layers
+Layer Technology Responsibility
+Presentation Layer React.js + Tailwind CSS Renders UI, handles user interactions, 
+manages client-side state via React 
+Context/Redux
+API Gateway Layer FastAPI (Python 3.11+) Exposes RESTful API endpoints, handles 
+routing, authentication middleware, and rate 
+limiting
+Business Logic Layer FastAPI Services + AI Module Implements booking workflows, AI matching 
+logic, payment orchestration, and notification 
+triggers
+Data Access Layer SQLAlchemy ORM Abstracts database queries; implements 
+repository pattern for clean data access
+Database Layer PostgreSQL 14+ Stores all persistent data including users, 
+bookings, transactions, and reviews
+Cache Layer Redis (Phase 2) Session cache, API response caching, rate limit 
+counters
+Storage Layer AWS S3 / Cloudinary Stores user profile photos, provider 
+documents, and service images
+Notification Layer Celery + Redis + 
+SendGrid/TwilioAsynchronous task queue for email and SMS 
+notifications
+14.3 Component Interaction Flow
+The request lifecycle follows this path: Browser ΓåÆ HTTPS ΓåÆ Nginx Reverse Proxy ΓåÆ FastAPI Application Server  
+ΓåÆ  SQLAlchemy  ORM  ΓåÆ  PostgreSQL.  Asynchronous  operations  (notifications,  AI  matching  at  scale)  are  
+offloaded to Celery workers. Static assets are served via CDN (CloudFront).
+14.4 Key Architectural Decisions
+Decision Rationale
+FastAPI over Django REST FastAPI offers native async support, automatic OpenAPI docs, and 
+better performance for I/O-bound workloads
+PostgreSQL over MySQL Superior JSON support, JSONB indexing for flexible fields, full-text 
+search, and better concurrency
+GharSeva Documentation  |  Page 20 of 34
+--- PAGE 21 ---
+Decision Rationale
+JWT Stateless Auth Eliminates server-side session storage, enabling horizontal scaling 
+without sticky sessions
+SQLAlchemy ORM Provides Pythonic database access, supports migrations via 
+Alembic, and abstracts vendor-specific SQL
+React.js + Tailwind CSS Component reusability, fast rendering via virtual DOM, utility-first 
+CSS for consistent design
+Monolith for MVP Reduces operational complexity; architecture supports future 
+decomposition into microservices
+GharSeva Documentation  |  Page 21 of 34
+--- PAGE 22 ---
+15. Database Design
+15.1 Core Entities and Tables
+15.1.1 Users Table
+Column Data Type Constraints Description
+user_id UUID PRIMARY KEY, DEFAULT 
+gen_random_uuid()Unique user identifier
+email VARCHAR(255) UNIQUE, NOT NULL, INDEXED User email address
+password_hash VARCHAR(255) NOT NULL Bcrypt hashed password
+full_name VARCHAR(150) NOT NULL User's full name
+phone VARCHAR(15) UNIQUE Mobile number for SMS
+role ENUM NOT NULL 
+(customer/provider/admin/suppor
+t)User role
+is_verified BOOLEAN DEFAULT FALSE Email verification status
+is_active BOOLEAN DEFAULT TRUE Account active status
+profile_photo_url TEXT NULLABLE URL to profile image
+created_at TIMESTAMP DEFAULT NOW() Account creation time
+updated_at TIMESTAMP ON UPDATE NOW() Last modification time
+15.1.2 Service Providers Table
+Column Data Type Constraints Description
+provider_id UUID PRIMARY KEY Provider identifier
+user_id UUID FK ΓåÆ users(user_id) Links to user account
+bio TEXT NULLABLE Provider description
+experience_years INTEGER DEFAULT 0 Years of experience
+avg_rating DECIMAL(3,2) DEFAULT 0.00 Computed average 
+rating
+total_jobs INTEGER DEFAULT 0 Total completed jobs
+is_available BOOLEAN DEFAULT TRUE Current availability flag
+service_radius_km INTEGER DEFAULT 10 Operating radius in km
+verification_status ENUM pending/approved/rejected KYC verification status
+bank_account_info JSONB ENCRYPTED Encrypted payment 
+details
+GharSeva Documentation  |  Page 22 of 34
+--- PAGE 23 ---
+15.1.3 Bookings Table
+Column Data Type Constraints Description
+booking_id UUID PRIMARY KEY Unique booking 
+reference
+customer_id UUID FK ΓåÆ users(user_id) Booking customer
+provider_id UUID FK ΓåÆ 
+service_providers(provider_id)Assigned provider
+service_id UUID FK ΓåÆ services(service_id) Booked service
+status ENUM pending/confirmed/in_progress/
+completed/cancelledBooking state
+scheduled_at TIMESTAMP NOT NULL Scheduled service 
+date/time
+address_id UUID FK ΓåÆ addresses(address_id) Service location
+total_amount DECIMAL(10,2) NOT NULL Total booking cost
+notes TEXT NULLABLE Customer special 
+instructions
+created_at TIMESTAMP DEFAULT NOW() Booking creation 
+timestamp
+15.2 Additional Tables Summary
+Table Name Purpose Key Relationships
+services Master list of service types and pricing Referenced by bookings, 
+provider_services
+service_categories Top-level service groupings (e.g., 
+Plumbing)Parent of services table
+provider_services Many-to-many: providers Γåö services Links providers to offered services
+payments Records all payment transactions One-to-one with bookings
+reviews Customer reviews and ratings post-
+serviceFK to bookings, customers, providers
+addresses Customer and provider location data Referenced by users, bookings
+notifications Log of all sent notifications FK to users
+disputes Dispute tickets raised by users FK to bookings, users
+provider_availability Provider schedule/calendar blocks FK to providers
+otp_tokens OTP storage for email/phone verification FK to users, TTL-indexed
+GharSeva Documentation  |  Page 23 of 34
+--- PAGE 24 ---
+16. Entity Relationship Diagram Description
+16.1 Entity Relationships
+The following describes the logical entity relationships within the GharSeva database schema:
+Relationship TypeDescription
+User ΓåÆ ServiceProvider One-to-OneA user with the 'provider' role has exactly one 
+provider profile.
+User ΓåÆ Booking (as Customer) One-to-ManyA customer can create multiple bookings over time.
+ServiceProvider ΓåÆ Booking One-to-ManyA provider can fulfill multiple bookings.
+Booking ΓåÆ Payment One-to-OneEach booking has exactly one associated payment 
+record.
+Booking ΓåÆ Review One-to-OneA review can be submitted once per completed 
+booking.
+ServiceProvider Γåö Services Many-to-ManyResolved via provider_services junction table.
+ServiceCategory ΓåÆ Services One-to-ManyEach category contains multiple services.
+User ΓåÆ Address One-to-ManyA user can save multiple service addresses.
+Booking ΓåÆ Address Many-to-OneMultiple bookings can reference the same address.
+User ΓåÆ Notification One-to-ManyEach user has a log of notifications received.
+Booking ΓåÆ Dispute One-to-OneA dispute can be raised per problematic booking.
+16.2 Key Constraints and Indexes
+  Γû╕Composite index on bookings (customer_id, status) for fast status-based lookups.
+  Γû╕Partial index on users (email) WHERE is_verified = TRUE for authenticated queries.
+  Γû╕GiST spatial index on addresses (coordinates) for geographic proximity queries.
+  Γû╕Composite unique constraint on reviews (booking_id, customer_id) to prevent duplicate reviews.
+  Γû╕CHECK constraint on bookings: scheduled_at > created_at to prevent past bookings.
+  Γû╕Foreign key constraints with ON DELETE RESTRICT on all user-linked tables to prevent orphaned records.
+GharSeva Documentation  |  Page 24 of 34
+--- PAGE 25 ---
+17. API Specification
+17.1 API Design Principles
+  Γû╕RESTful design following OpenAPI 3.0 specification.
+  Γû╕All endpoints prefixed with /api/v1/.
+  Γû╕JSON request and response bodies throughout.
+  Γû╕HTTP status codes used semantically (200, 201, 400, 401, 403, 404, 422, 500).
+  Γû╕JWT Bearer token required for all protected endpoints.
+17.2 Authentication Endpoints
+MethodEndpoint Description Auth Required
+POST/api/v1/auth/register Register new user account No
+POST/api/v1/auth/login Authenticate and receive JWT tokens No
+POST/api/v1/auth/logout Invalidate refresh token Yes
+POST/api/v1/auth/refresh Obtain new access token Refresh Token
+POST/api/v1/auth/verify-email Verify email with OTP No
+POST/api/v1/auth/forgot-password Request password reset OTP No
+POST/api/v1/auth/reset-password Set new password using OTP No
+17.3 Booking Endpoints
+MethodEndpoint Description Auth Required
+GET/api/v1/bookings List all bookings for authenticated user Yes
+POST/api/v1/bookings Create new booking request Yes (Customer)
+GET/api/v1/bookings/{id} Get single booking details Yes
+PATCH/api/v1/bookings/{id}/status Update booking status Yes 
+(Provider/Admin)
+DELETE/api/v1/bookings/{id} Cancel a booking Yes 
+(Customer/Admin)
+GET/api/v1/bookings/{id}/invoice Download invoice PDF Yes
+17.4 Provider Endpoints
+MethodEndpoint Description Auth Required
+GET/api/v1/providers Search and list providers with filters No
+GET/api/v1/providers/{id} Get provider public profile No
+GharSeva Documentation  |  Page 25 of 34
+--- PAGE 26 ---
+MethodEndpoint Description Auth Required
+PUT/api/v1/providers/{id} Update provider profile Yes 
+(Provider/Admin)
+GET/api/v1/providers/{id}/availability Get provider calendar availability No
+POST/api/v1/providers/{id}/availability Set availability slots Yes (Provider)
+GET/api/v1/providers/match AI-powered provider matching Yes (Customer)
+17.5 Payment Endpoints
+MethodEndpoint Description Auth Required
+POST/api/v1/payments/initiate Initiate Razorpay payment order Yes
+POST/api/v1/payments/verify Verify payment signature from gateway Yes
+POST/api/v1/payments/refund Issue refund for cancelled booking Yes (Admin)
+GET/api/v1/payments/history Get payment history for user Yes
+GharSeva Documentation  |  Page 26 of 34
+--- PAGE 27 ---
+18. UI/UX Screen List
+Screen IDScreen Name User RoleKey Features
+UI-01Landing Page PublicHero section, service categories, 
+testimonials, CTA buttons
+UI-02Registration Page PublicEmail/password form, social login, 
+terms acceptance
+UI-03Login Page PublicEmail/password login, forgot password 
+link, social login
+UI-04Email Verification PublicOTP input, resend option, success 
+confirmation
+UI-05Customer Home Dashboard CustomerQuick search, recommended services, 
+recent bookings, notifications
+UI-06Service Category Browse CustomerCategory cards, sub-category filters, 
+service list grid
+UI-07Provider Search Results CustomerProvider cards with rating, price, 
+distance; filter panel; map view
+UI-08Provider Profile Page CustomerPhoto, bio, services, ratings 
+breakdown, availability calendar
+UI-09Booking Flow ΓÇô Step 1 CustomerDate/time picker, slot availability, 
+address input
+UI-10Booking Flow ΓÇô Step 2 CustomerCost breakdown, special instructions, 
+booking summary
+UI-11Payment Page CustomerRazorpay widget, order summary, 
+secure payment badge
+UI-12Booking Confirmation CustomerBooking ID, provider details, scheduled 
+time, action buttons
+UI-13My Bookings List CustomerTabbed view: Upcoming, Active, 
+Completed, Cancelled
+UI-14Booking Detail Page Customer/ProviderFull booking info, status timeline, 
+contact info, actions
+UI-15Review Submission Form CustomerStar rating, written review, photo 
+upload option
+UI-16Customer Profile CustomerPersonal info, saved addresses, 
+notification preferences
+UI-17Provider Dashboard ProviderEarnings summary, upcoming jobs, 
+acceptance rate, reviews
+UI-18Provider Job Management ProviderIncoming requests, active jobs, job 
+history
+UI-19Provider Profile Edit ProviderBio, skills, certifications, photo, service 
+areas
+GharSeva Documentation  |  Page 27 of 34
+--- PAGE 28 ---
+Screen IDScreen Name User RoleKey Features
+UI-20Provider Availability ProviderWeekly calendar, time slot toggle, day-
+off management
+UI-21Admin Dashboard AdminKPIs: Users, Bookings, Revenue, Issues; 
+charts; alerts
+UI-22User Management (Admin) AdminSearchable table, filters, bulk actions, 
+account actions
+UI-23Provider Verification (Admin) AdminApplication queue, document viewer, 
+approve/reject action
+UI-24Dispute Management Admin/SupportDispute list, timeline, evidence, 
+resolution actions
+UI-25Reports & Analytics AdminDate-range filters, export CSV, charts 
+by category/region
+GharSeva Documentation  |  Page 28 of 34
+--- PAGE 29 ---
+19. Security Requirements
+19.1 Authentication & Authorization
+  Γû╕All passwords must be hashed using bcrypt with a minimum cost factor of 12.
+  Γû╕JWT access tokens expire in 15 minutes; refresh tokens expire in 7 days.
+  Γû╕Role-based access control (RBAC) enforced at the FastAPI dependency level.
+  Γû╕Account lockout after 5 consecutive failed login attempts; cooldown of 30 minutes.
+  Γû╕Multi-factor authentication (MFA) available for admin accounts.
+19.2 Data Security
+  Γû╕All API communication over HTTPS/TLS 1.3; HTTP redirects to HTTPS with HSTS.
+  Γû╕Sensitive PII fields (phone, bank info) encrypted at rest using AES-256.
+  Γû╕PostgreSQL connection uses SSL; connection string stored in environment variables, never in code.
+  Γû╕AWS S3 buckets are private; file access is via pre-signed URLs with TTL of 10 minutes.
+19.3 API Security
+Security Control Implementation
+Input Validation Pydantic models enforce strict type validation on all API inputs
+SQL Injection Prevention SQLAlchemy ORM with parameterized queries; raw SQL prohibited
+XSS Prevention React auto-escapes JSX output; Content Security Policy headers 
+enforced
+CSRF Protection SameSite cookie attribute; CSRF token for state-changing 
+operations
+Rate Limiting FastAPI middleware limits to 100 req/min per IP; stricter on auth 
+endpoints
+CORS Policy Strict CORS whitelist of production domain only
+Secrets Management Secrets stored in AWS Parameter Store / environment variables
+Dependency Scanning Snyk / Dependabot automated vulnerability scanning in CI pipeline
+19.4 Compliance
+  Γû╕GDPR-aligned data practices: right to erasure, data portability, and explicit consent at registration.
+  Γû╕Audit log maintained for all admin actions with user ID, action, timestamp, and IP.
+  Γû╕Payment card data is never stored on platform; Razorpay handles PCI-DSS compliance.
+GharSeva Documentation  |  Page 29 of 34
+--- PAGE 30 ---
+20. Testing Strategy
+20.1 Testing Levels
+Testing Level Scope Tools Target Coverage
+Unit Testing Individual functions, service 
+methods, utility classespytest (backend), Jest + React  
+Testing Library (frontend)> 80%
+Integration Testing API endpoint to database 
+interaction, service layer flowspytest + TestClient (FastAPI), 
+test PostgreSQL DB> 70%
+System Testing End-to-end user flows: 
+registration, booking, paymentPlaywright / Cypress All critical paths
+Performance Testing API throughput, response time 
+under concurrent loadLocust / k6 5,000 concurrent 
+users
+Security Testing OWASP Top 10 vulnerability 
+assessment, pen testingOWASP ZAP, Bandit (Python) Zero critical 
+findings
+User Acceptance Testing Stakeholder validation of 
+business requirementsManual, with test scripts 100% BRD items
+Regression Testing Verify new changes don't break 
+existing functionalityAutomated CI pipeline On every PR 
+merge
+20.2 Test Environments
+Environment Purpose Data
+Local Dev Developer unit and integration tests Mocked / seeded test data
+Staging UAT and end-to-end testing Anonymized production-like 
+data
+Production Live monitoring, smoke tests post-deployment Real data
+20.3 Defect Management
+Defects are tracked using GitHub Issues with the following severity taxonomy:
+Severity Definition Response SLA
+Critical (P0) Platform down, data loss, security breach Fix within 4 hours
+High (P1) Core feature broken, payment failure, data integrity 
+issueFix within 24 hours
+Medium (P2) Feature partially broken, workaround exists Fix within 3 business days
+Low (P3) Minor UI issue, cosmetic defect, minor UX friction Fix in next sprint
+GharSeva Documentation  |  Page 30 of 34
+--- PAGE 31 ---
+21. Deployment Strategy
+21.1 Deployment Architecture
+GharSeva uses a containerized deployment model with Docker and Docker Compose for local and staging  
+environments, progressing to AWS ECS (Elastic Container Service) for production with an RDS PostgreSQL  
+managed database instance.
+21.2 Environment Configuration
+Environment Infrastructure Deployment Method
+Development Local machine / Docker Compose Developer manually runs docker-
+compose up
+Staging AWS EC2 (t3.medium) + RDS (db.t3.micro) GitHub Actions CI/CD on merge to 
+'develop' branch
+Production AWS ECS Fargate + RDS PostgreSQL (Multi-
+AZ)GitHub Actions CD on merge to 'main' +  
+manual approval gate
+21.3 CI/CD Pipeline Stages
+Stage Action Trigger
+1. Code Commit Developer pushes feature branch Manual
+2. Lint & Format ESLint (frontend), Black + flake8 (backend) On every push
+3. Unit Tests Run full unit test suite with coverage check On every push
+4. Build Docker 
+ImagesBuild frontend (Nginx) and backend (Uvicorn) 
+imagesOn PR creation
+5. Integration Tests Run API integration tests against staging DB On PR to develop
+6. Security Scan OWASP ZAP, Bandit, Snyk dependency scan On PR to develop
+7. Deploy to Staging Push images to ECR, update ECS task definition On merge to develop
+8. Smoke Tests Automated health checks and critical path 
+testsPost-staging deploy
+9. Deploy to 
+ProductionSame as staging with manual approval gate On merge to main
+21.4 Rollback Strategy
+  Γû╕Blue-Green deployment strategy ensures zero downtime during releases.
+  Γû╕Previous ECS task definition version is retained for immediate rollback.
+  Γû╕Database migrations use Alembic with reversible down migrations.
+  Γû╕Rollback can be triggered within 5 minutes via AWS Console or CLI.
+GharSeva Documentation  |  Page 31 of 34
+--- PAGE 32 ---
+22. Future Scope
+PhaseFeature Description Timeline
+Phase 2Native Mobile Apps iOS and Android apps using React Native for 
+push notifications and GPS trackingQ3 2026
+Phase 2In-App Chat Real-time messaging between customer and 
+provider via WebSocketQ3 2026
+Phase 2Multi-Language Support Hindi, Tamil, Telugu, and Marathi language 
+supportQ4 2026
+Phase 3AI Demand Forecasting ML model predicting service demand by 
+geography and season for provider 
+recommendationsQ1 2027
+Phase 3Subscription Plans Monthly/annual plans for customers offering 
+discounted bookings and priority matchingQ1 2027
+Phase 3Dynamic Pricing Engine AI-driven surge pricing during peak demand 
+periodsQ2 2027
+Phase 4IoT Integration Smart home integration for automated service 
+triggers (e.g., AC service reminder)Q3 2027
+Phase 4AR Service Preview Augmented reality for customers to visualize 
+service outcomes (e.g., painting colors)Q4 2027
+Phase 4B2B Corporate Services Bulk service contracts for offices, co-working 
+spaces, and residential societiesQ4 2027
+GharSeva Documentation  |  Page 32 of 34
+--- PAGE 33 ---
+23. Success Metrics
+23.1 Business Metrics
+Metric Definition 6-Month Target 12-Month Target
+Monthly Active Users Unique users with at least 
+one session per month10,000 50,000
+Bookings Per Month Total confirmed service 
+bookings5,000 25,000
+Gross Merchandise Value (GMV) Total transaction value 
+processedINR 25 Lakhs INR 1.5 Crores
+Customer Retention Rate % customers who book 
+again within 90 days35% 55%
+Provider Utilization Rate % of available slots that are 
+booked40% 65%
+Net Promoter Score (NPS) Customer satisfaction and 
+advocacy measure> 30 > 50
+23.2 Technical Metrics
+Metric Target
+API Uptime 99.9% (measured monthly)
+Mean Time to Recovery (MTTR) < 30 minutes for P0 incidents
+Average API Response Time < 200ms at 95th percentile
+Deployment Frequency Minimum 2 releases per week
+Change Failure Rate < 5% of deployments require rollback
+Security Vulnerability Remediation Critical: within 4 hours; High: within 24 hours
+GharSeva Documentation  |  Page 33 of 34
+--- PAGE 34 ---
+24. Conclusion
+GharSeva  represents  a  comprehensive,  technology-forward  solution  to  the  deeply  fragmented  and  
+underserved home services market in India. By combining the power of artificial intelligence with a robust,  
+scalable technical architecture, the platform addresses real consumer pain points while creating economic  
+opportunity for skilled service professionals.
+This Software Project Documentation captures the complete lifecycle requirements of the GharSeva platform  
+ΓÇö from business vision and stakeholder alignment through to technical specifications, security controls,  
+testing strategy, and deployment planning. Every design decision reflects industry best practices and is  
+grounded in the realities of building production-grade software at scale.
+The chosen technology stack ΓÇö React.js with Tailwind CSS, FastAPI, PostgreSQL, SQLAlchemy, and JWT ΓÇö  
+provides  an  optimal  balance  of  developer  productivity,  runtime  performance,  and  maintainability.  The  
+architecture is deliberately designed to support the MVP phase while providing a clear path for evolution into a  
+distributed microservices system as the business scales.
+From  an  academic  perspective,  this  project  demonstrates  mastery  of  full-stack  software  engineering  
+principles,  database  design,  API  development,  system  architecture,  and  modern  software  development  
+lifecycle practices ΓÇö core competencies of the Master of Computer Applications program.
+It is anticipated that GharSeva, upon successful completion and deployment, will serve as a benchmark for  
+technology-driven  disruption  in  the  home  services  sector,  delivering  measurable  value  to  customers,  
+providers, and stakeholders alike.
+ΓÇö End of Document ΓÇö
+GharSeva ΓÇô AI-Powered Home Services Marketplace
+MCA Project Documentation v1.0 | July 2026
+GharSeva Documentation  |  Page 34 of 34

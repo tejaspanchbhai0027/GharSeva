@@ -24,6 +24,7 @@ async def get_services(
     search_query: Optional[str] = Query(None, description="Search term for name/description"),
     price_min: Optional[float] = Query(None, description="Minimum base price"),
     price_max: Optional[float] = Query(None, description="Maximum base price"),
+    is_featured: Optional[bool] = Query(None, description="Filter by featured status"),
     service_repo: ServiceRepository = Depends(get_service_repository)
 ):
     use_case = ListServicesUseCase(service_repo)
@@ -31,7 +32,8 @@ async def get_services(
         category_id=category_id,
         search_query=search_query,
         price_min=price_min,
-        price_max=price_max
+        price_max=price_max,
+        is_featured=is_featured
     )
 
 

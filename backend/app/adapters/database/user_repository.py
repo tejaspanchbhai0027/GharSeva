@@ -53,3 +53,13 @@ class UserRepository(UserRepo):
         self.db.commit()
         self.db.refresh(provider)
         return provider
+
+    def get_addresses_by_user_id(self, user_id: UUID) -> list:
+        from app.adapters.database.sqlalchemy_models import Address
+        return self.db.query(Address).filter(Address.user_id == user_id).order_by(Address.created_at.desc()).all()
+
+    def create_address(self, address) -> any:
+        self.db.add(address)
+        self.db.commit()
+        self.db.refresh(address)
+        return address

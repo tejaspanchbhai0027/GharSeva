@@ -11,6 +11,9 @@ from app.use_cases.booking.create_booking import CreateBookingUseCase, CreateBoo
 from app.use_cases.booking.list_bookings import ListBookingsUseCase
 from app.use_cases.booking.update_booking_status import UpdateBookingStatusUseCase
 from app.use_cases.booking.get_booking_details import GetBookingDetailsUseCase
+from app.use_cases.review.get_booking_review import GetBookingReviewUseCase
+from app.adapters.api.dependencies import get_booking_repository, get_current_user, get_review_repository
+from app.domain.protocols.review_repo import ReviewRepository
 
 router = APIRouter()
 
@@ -78,3 +81,15 @@ async def update_booking_status(
         if "not found" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/{id}/review")
+async def get_booking_review(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    review_repo: ReviewRepository = Depends(get_review_repository)
+):
+    use_case = GetBookingReviewUseCase(review_repo)
+    review = use_case.execute(id, current_user)
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+    return review

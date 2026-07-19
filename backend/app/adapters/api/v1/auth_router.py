@@ -206,3 +206,34 @@ async def read_me(current_user: User = Depends(get_current_user)):
         "full_name": current_user.full_name,
         "role": current_user.role
     }
+
+from app.use_cases.user.address_management import AddressManagementUseCase, CreateAddressInput
+
+@router.get("/me/addresses")
+async def get_my_addresses(
+    current_user: User = Depends(get_current_user),
+    user_repo: UserRepository = Depends(get_user_repository)
+):
+    use_case = AddressManagementUseCase(user_repo)
+    return use_case.list_addresses(user_id=str(current_user.user_id))
+
+@router.post("/me/addresses", status_code=status.HTTP_201_CREATED)
+async def add_my_address(
+    address_data: CreateAddressInput,
+    current_user: User = Depends(get_current_user),
+    user_repo: UserRepository = Depends(get_user_repository)
+):
+    use_case = AddressManagementUseCase(user_repo)
+    addr = use_case.add_address(user_id=str(current_user.user_id), input_data=address_data)
+    
+    coord_dict = None
+    if addr.coordinates:
+        coord_dict = {"lat": addr.coordinates[1], "lng": addr.coordinates[0]}
+        
+    return {
+        "address_id": str(addr.address_id),
+        "title": addr.title,
+        "address_text": addr.address_text,
+        "coordinates": coord_dict,
+        "created_at": addr.created_at.isoformat()
+    }

@@ -105,6 +105,7 @@ class Service(Base):
         Enum("flat", "hourly", name="price_type"),
         nullable=False
     )
+    is_featured = Column(Boolean, default=False, nullable=False)
 
 
 class ProviderService(Base):
@@ -220,6 +221,7 @@ class Review(Base):
     rating = Column(Integer, nullable=False)
     comment = Column(Text, nullable=True)
     reply = Column(Text, nullable=True)
+    is_hidden = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     __table_args__ = (

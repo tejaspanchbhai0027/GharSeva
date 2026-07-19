@@ -15,6 +15,8 @@ from app.adapters.database.service_repository import SQLAlchemyServiceRepository
 from app.domain.protocols.service_repo import ServiceRepository
 from app.adapters.database.booking_repository import SQLAlchemyBookingRepository
 from app.domain.protocols.booking_repo import BookingRepository
+from app.domain.protocols.review_repo import ReviewRepository
+from app.adapters.database.review_repository import SQLAlchemyReviewRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -29,6 +31,9 @@ def get_service_repository(db: Session = Depends(get_db)) -> ServiceRepository:
 
 def get_booking_repository(db: Session = Depends(get_db)) -> BookingRepository:
     return SQLAlchemyBookingRepository(db)
+
+def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
+    return SQLAlchemyReviewRepository(db)
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),

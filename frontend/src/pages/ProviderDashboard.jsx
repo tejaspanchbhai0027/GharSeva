@@ -6,7 +6,7 @@ import api from '../services/api';
 import {
   LogOut, Star, Briefcase, ToggleLeft, ToggleRight,
   Clock, CheckCircle2, XCircle, Wrench, ChevronRight,
-  User, Home, TrendingUp, MapPin, Shield, Calendar
+  User, Home, TrendingUp, MapPin, Shield, Calendar, MessageSquare, Reply
 } from 'lucide-react';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -24,9 +24,14 @@ export default function ProviderDashboard() {
   const navigate = useNavigate();
   const { user } = useSelector((s) => s.auth);
   const [bookings, setBookings] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [activeTab, setActiveTab] = useState('jobs');
+  
+  const [replyText, setReplyText] = useState('');
+  const [replyingTo, setReplyingTo] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -38,8 +43,26 @@ export default function ProviderDashboard() {
       const allProviders = pRes.data || [];
       const myProfile = allProviders.find(p => p.user_id === user?.user_id || p.email === user?.email);
       setProfile(myProfile || null);
+      
+      if (myProfile) {
+        api.get(`/providers/${myProfile.provider_id}/reviews`)
+          .then(res => setReviews(res.data || []))
+          .catch(() => setReviews([]));
+      }
     }).finally(() => setLoading(false));
   }, [user]);
+
+  const handleReplySubmit = async (reviewId) => {
+    if (!replyText.trim()) return;
+    try {
+      const res = await api.patch(`/reviews/${reviewId}/reply`, { reply: replyText });
+      setReviews(reviews.map(r => r.review_id === reviewId ? res.data : r));
+      setReplyingTo(null);
+      setReplyText('');
+    } catch (err) {
+      alert("Failed to submit reply.");
+    }
+  };
 
   const stats = {
     total:     bookings.length,
@@ -160,54 +183,136 @@ export default function ProviderDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Bookings */}
-          <div className="lg:col-span-2 rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-violet-400" />
-              <span className="font-semibold text-sm">Assigned Jobs</span>
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Tabs */}
+            <div className="flex items-center gap-4 border-b border-slate-800 pb-2">
+              <button 
+                onClick={() => setActiveTab('jobs')}
+                className={`font-semibold text-sm pb-2 border-b-2 transition-colors ${activeTab === 'jobs' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+              >
+                Assigned Jobs
+              </button>
+              <button 
+                onClick={() => setActiveTab('reviews')}
+                className={`font-semibold text-sm pb-2 border-b-2 transition-colors ${activeTab === 'reviews' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+              >
+                Customer Reviews
+              </button>
             </div>
 
-            {loading ? (
-              <div className="p-10 text-center">
-                <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-xs text-slate-500">Loading jobs…</p>
-              </div>
-            ) : bookings.length === 0 ? (
-              <div className="p-10 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-7 h-7 text-slate-600" />
+            {/* Bookings */}
+            {activeTab === 'jobs' && (
+              <div className="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-violet-400" />
+                  <span className="font-semibold text-sm">Assigned Jobs</span>
                 </div>
-                <p className="text-sm font-semibold text-slate-400">No jobs assigned yet</p>
-                <p className="text-xs text-slate-600 mt-1">Make sure your availability is set to receive jobs</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-800/50">
-                {bookings.map((b) => {
-                  const cfg = STATUS_CONFIG[b.status] || STATUS_CONFIG.pending;
-                  return (
-                    <div key={b.booking_id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-800/20 transition group">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center`}>
-                          <Wrench className={`w-4 h-4 ${cfg.color}`} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold">{b.service_name || 'Service Job'}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {b.scheduled_at ? new Date(b.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Schedule TBD'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
-                          {cfg.label}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition" />
-                      </div>
+
+                {loading ? (
+                  <div className="p-10 text-center">
+                    <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-xs text-slate-500">Loading jobs…</p>
+                  </div>
+                ) : bookings.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto mb-4">
+                      <Briefcase className="w-7 h-7 text-slate-600" />
                     </div>
-                  );
-                })}
+                    <p className="text-sm font-semibold text-slate-400">No jobs assigned yet</p>
+                    <p className="text-xs text-slate-600 mt-1">Make sure your availability is set to receive jobs</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/50">
+                    {bookings.map((b) => {
+                      const cfg = STATUS_CONFIG[b.status] || STATUS_CONFIG.pending;
+                      return (
+                        <div key={b.booking_id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-800/20 transition group">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center`}>
+                              <Wrench className={`w-4 h-4 ${cfg.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold">{b.service_name || 'Service Job'}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {b.scheduled_at ? new Date(b.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Schedule TBD'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
+                              {cfg.label}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
+            
+            {/* Reviews */}
+            {activeTab === 'reviews' && (
+              <div className="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-400" />
+                  <span className="font-semibold text-sm">Customer Reviews</span>
+                </div>
+                
+                {reviews.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <MessageSquare className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-slate-400">No reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/50">
+                    {reviews.map(review => (
+                      <div key={review.review_id} className="p-6">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <span key={star} className={`text-sm ${star <= review.rating ? 'text-amber-500' : 'text-slate-700'}`}>★</span>
+                            ))}
+                          </div>
+                          <span className="text-xs text-slate-500">{new Date(review.created_at).toLocaleDateString()}</span>
+                        </div>
+                        {review.comment && <p className="text-sm text-slate-300 italic mb-4">"{review.comment}"</p>}
+                        
+                        {review.reply ? (
+                          <div className="bg-slate-800/50 p-3 rounded-lg border-l-2 border-violet-500">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Your Reply</p>
+                            <p className="text-sm text-slate-300">{review.reply}</p>
+                          </div>
+                        ) : (
+                          <div>
+                            {replyingTo === review.review_id ? (
+                              <div className="mt-3 flex gap-2">
+                                <input 
+                                  type="text"
+                                  value={replyText}
+                                  onChange={e => setReplyText(e.target.value)}
+                                  placeholder="Type your reply..."
+                                  className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white"
+                                />
+                                <button onClick={() => handleReplySubmit(review.review_id)} className="bg-violet-500 text-white px-4 py-2 rounded text-sm font-bold">Send</button>
+                                <button onClick={() => { setReplyingTo(null); setReplyText(''); }} className="bg-slate-800 text-slate-300 px-4 py-2 rounded text-sm font-bold">Cancel</button>
+                              </div>
+                            ) : (
+                              <button onClick={() => setReplyingTo(review.review_id)} className="text-xs text-violet-400 font-semibold hover:underline flex items-center gap-1">
+                                <Reply size={14} /> Reply to Customer
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            
           </div>
 
           {/* Profile Card */}

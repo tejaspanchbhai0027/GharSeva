@@ -13,11 +13,16 @@ import RegisterPage       from './pages/RegisterPage';
 import VerifyEmailPage    from './pages/VerifyEmailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage  from './pages/ResetPasswordPage';
+import ProviderBrowsePage from './pages/ProviderBrowsePage';
+import ProviderProfilePage from './pages/ProviderProfilePage';
 
 // Role Dashboards
 import CustomerDashboard from './pages/CustomerDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
 import AdminDashboard    from './pages/AdminDashboard';
+import BookingWizardPage from './pages/BookingWizardPage';
+import BookingTimelinePage from './pages/BookingTimelinePage';
+import ServiceDetailsPage from './pages/ServiceDetailsPage';
 
 // ---------------------------------------------------------
 // Guards
@@ -66,6 +71,17 @@ function App() {
 
   return (
     <Routes>
+      <Route
+        path="/services/:id"
+        element={
+          <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+            <Navbar />
+            <main className="flex-grow"><ServiceDetailsPage /></main>
+            <Footer />
+          </div>
+        }
+      />
+      
       {/* ---- Public pages with Navbar + Footer ---- */}
       <Route
         path="/"
@@ -73,6 +89,26 @@ function App() {
           <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
             <Navbar />
             <main className="flex-grow"><LandingPage /></main>
+            <Footer />
+          </div>
+        }
+      />
+      <Route
+        path="/providers"
+        element={
+          <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+            <Navbar />
+            <main className="flex-grow"><ProviderBrowsePage /></main>
+            <Footer />
+          </div>
+        }
+      />
+      <Route
+        path="/providers/:id"
+        element={
+          <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+            <Navbar />
+            <main className="flex-grow"><ProviderProfilePage /></main>
             <Footer />
           </div>
         }
@@ -108,7 +144,7 @@ function App() {
         }
       />
 
-      {/* ---- Protected dashboards (no shared Navbar/Footer) ---- */}
+      {/* ---- Protected Dashboards & Booking ---- */}
       <Route
         path="/customer/dashboard"
         element={
@@ -117,6 +153,31 @@ function App() {
           </RequireAuth>
         }
       />
+      <Route
+        path="/customer/bookings/:id"
+        element={
+          <RequireAuth>
+            <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+              <Navbar />
+              <main className="flex-grow"><BookingTimelinePage /></main>
+              <Footer />
+            </div>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/book/:providerId/:serviceId"
+        element={
+          <RequireAuth>
+            <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+              <Navbar />
+              <main className="flex-grow"><BookingWizardPage /></main>
+              <Footer />
+            </div>
+          </RequireAuth>
+        }
+      />
+      
       <Route
         path="/provider/dashboard"
         element={

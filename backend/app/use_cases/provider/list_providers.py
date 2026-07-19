@@ -12,14 +12,25 @@ class ListProvidersUseCase:
         self,
         category_id: Optional[str] = None,
         experience_min: Optional[int] = None,
-        rating_min: Optional[float] = None
-    ) -> List[Dict[str, Any]]:
+        rating_min: Optional[float] = None,
+        search: Optional[str] = None,
+        sort_by: str = "rating",
+        sort_order: str = "desc",
+        page: int = 1,
+        limit: int = 10
+    ) -> Dict[str, Any]:
         category_uuid = UUID(category_id) if category_id else None
+        offset = (page - 1) * limit
 
-        providers = self.provider_repo.list_providers(
+        providers, total_count = self.provider_repo.list_providers(
             category_id=category_uuid,
             experience_min=experience_min,
-            rating_min=rating_min
+            rating_min=rating_min,
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            limit=limit,
+            offset=offset
         )
 
         results = []
@@ -41,4 +52,11 @@ class ListProvidersUseCase:
                     "service_radius_km": provider.service_radius_km,
                     "verification_status": provider.verification_status
                 })
-        return results
+        
+        return {
+            "items": results,
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "total_pages": (total_count + limit - 1) // limit
+        }

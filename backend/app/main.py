@@ -1,37 +1,30 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.adapters.api.v1 import auth_router, booking_router, provider_router, payment_router, service_router
+from app.adapters.api.v1 import auth_router, provider_router, booking_router, payment_router, service_router, review_router
 
 app = FastAPI(
     title="GharSeva API",
-    description="AI-Powered Home Services Marketplace Backend",
+    description="API for GharSeva Home Services Platform",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
 )
 
 # CORS configuration
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    # Add other domains in production
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # In production, specify frontend origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routers
+# API Routers
 app.include_router(auth_router.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(provider_router.router, prefix="/api/v1/providers", tags=["Service Providers"])
 app.include_router(booking_router.router, prefix="/api/v1/bookings", tags=["Bookings"])
-app.include_router(provider_router.router, prefix="/api/v1/providers", tags=["Providers"])
 app.include_router(payment_router.router, prefix="/api/v1/payments", tags=["Payments"])
-app.include_router(service_router.router, prefix="/api/v1", tags=["Services"])
+app.include_router(service_router.router, prefix="/api/v1/services", tags=["Services"])
+app.include_router(review_router.router, prefix="/api/v1/reviews", tags=["Reviews"])
 
 @app.get("/")
 async def root():

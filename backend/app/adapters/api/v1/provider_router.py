@@ -3,17 +3,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.adapters.api.dependencies import (
-    get_provider_repository, get_user_repository, get_current_user, RoleChecker
+    get_provider_repository, get_user_repository, get_current_user, RoleChecker, get_review_repository
 )
 from app.adapters.database.provider_repository import ProviderRepository
 from app.adapters.database.user_repository import UserRepository
 from app.adapters.database.sqlalchemy_models import User
+from app.domain.protocols.review_repo import ReviewRepository
 
 from app.use_cases.provider.list_providers import ListProvidersUseCase
 from app.use_cases.provider.get_provider_profile import GetProviderProfileUseCase
 from app.use_cases.provider.update_provider_profile import UpdateProviderProfileUseCase
 from app.use_cases.provider.manage_availability import ManageAvailabilityUseCase
 from app.use_cases.provider.match_providers import MatchProvidersUseCase
+from app.use_cases.review.list_provider_reviews import ListProviderReviewsUseCase
 
 router = APIRouter()
 
@@ -40,6 +42,11 @@ async def get_providers(
     category_id: Optional[str] = None,
     experience_min: Optional[int] = None,
     rating_min: Optional[float] = None,
+    search: Optional[str] = None,
+    sort_by: str = "rating",
+    sort_order: str = "desc",
+    page: int = 1,
+    limit: int = 10,
     provider_repo: ProviderRepository = Depends(get_provider_repository),
     user_repo: UserRepository = Depends(get_user_repository)
 ):
@@ -47,8 +54,22 @@ async def get_providers(
     return use_case.execute(
         category_id=category_id,
         experience_min=experience_min,
-        rating_min=rating_min
+        rating_min=rating_min,
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        limit=limit
     )
+
+@router.get("/{id}/reviews")
+async def get_provider_reviews(
+    id: str,
+    include_hidden: bool = False,
+    review_repo: ReviewRepository = Depends(get_review_repository)
+):
+    use_case = ListProviderReviewsUseCase(review_repo)
+    return use_case.execute(id, include_hidden=include_hidden)
 
 
 @router.get("/match")
@@ -79,7 +100,7 @@ async def get_matches(
 
 
 @router.get("/{id}")
-async def get_provider_profile(
+async def get_provider(
     id: str,
     provider_repo: ProviderRepository = Depends(get_provider_repository),
     user_repo: UserRepository = Depends(get_user_repository)
@@ -89,6 +110,27 @@ async def get_provider_profile(
         return use_case.execute(provider_id=id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+@router.get("/{id}/services")
+async def get_provider_services(
+    id: str,
+    provider_repo: ProviderRepository = Depends(get_provider_repository)
+):
+    from uuid import UUID
+    try:
+        services = provider_repo.get_provider_services(UUID(id))
+        return [
+            {
+                "service_id": str(s.service_id),
+                "category_id": str(s.category_id),
+                "name": s.name,
+                "description": s.description,
+                "base_price": float(s.base_price),
+                "price_type": s.price_type
+            } for s in services
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.put("/{id}")
