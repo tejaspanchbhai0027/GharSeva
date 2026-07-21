@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.adapters.api.v1 import auth_router, provider_router, booking_router, payment_router, service_router, review_router
+from app.adapters.api.v1 import auth_router, provider_router, booking_router, payment_router, service_router, review_router, admin_router
 
 app = FastAPI(
     title="GharSeva API",
@@ -25,6 +25,7 @@ app.include_router(booking_router.router, prefix="/api/v1/bookings", tags=["Book
 app.include_router(payment_router.router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(service_router.router, prefix="/api/v1/services", tags=["Services"])
 app.include_router(review_router.router, prefix="/api/v1/reviews", tags=["Reviews"])
+app.include_router(admin_router.router, prefix="/api/v1/admin", tags=["Admin"])
 
 @app.get("/")
 async def root():

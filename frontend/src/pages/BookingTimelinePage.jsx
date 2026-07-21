@@ -8,9 +8,11 @@ const BookingTimelinePage = () => {
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
   const [review, setReview] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // null | {paid, status, ...}
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
   
   // Review form state
   const [rating, setRating] = useState(5);
@@ -24,11 +26,19 @@ const BookingTimelinePage = () => {
         setBooking(res.data);
         
         if (res.data.status === 'completed') {
+          // Fetch existing review
           try {
             const revRes = await api.get(`/bookings/${id}/review`);
             setReview(revRes.data);
           } catch (e) {
             // No review found (404) is expected if not reviewed yet
+          }
+          // Fetch payment status
+          try {
+            const payRes = await api.get(`/payments/status/${id}`);
+            setPaymentStatus(payRes.data);
+          } catch (e) {
+            setPaymentStatus({ paid: false, status: null });
           }
         }
       } catch (err) {
@@ -59,11 +69,7 @@ const BookingTimelinePage = () => {
     e.preventDefault();
     setSubmittingReview(true);
     try {
-      const payload = {
-        booking_id: id,
-        rating,
-        comment
-      };
+      const payload = { booking_id: id, rating, comment };
       const res = await api.post('/reviews', payload);
       setReview(res.data);
       alert("Review submitted successfully!");
@@ -71,6 +77,80 @@ const BookingTimelinePage = () => {
       alert(err.response?.data?.detail || "Failed to submit review.");
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) { resolve(true); return; }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayNow = async () => {
+    setPayLoading(true);
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        alert('Failed to load payment gateway. Please check your internet connection.');
+        return;
+      }
+
+      const { data: order } = await api.post('/payments/initiate', { booking_id: id });
+
+      const options = {
+        key: order.razorpay_key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'GharSeva',
+        description: 'Home Service Payment',
+        order_id: order.order_id,
+        prefill: order.prefill,
+        theme: { color: '#F59E0B' },
+        handler: async (response) => {
+          try {
+            await api.post('/payments/verify', {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            setPaymentStatus({ paid: true, status: 'captured', amount: order.amount / 100 });
+            alert('🎉 Payment successful! Your invoice is ready to download.');
+          } catch (err) {
+            alert(err.response?.data?.detail || 'Payment verification failed.');
+          }
+        },
+        modal: {
+          ondismiss: () => setPayLoading(false)
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to initiate payment.');
+    } finally {
+      setPayLoading(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    try {
+      const response = await api.get(`/payments/${id}/invoice`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `gharseva-invoice-${id.slice(0, 8)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to download invoice.');
     }
   };
 
@@ -231,12 +311,32 @@ const BookingTimelinePage = () => {
             
             <div className="mt-6">
               {booking.status === 'completed' ? (
-                <button 
-                  onClick={() => alert("Payment Gateway Integration (Razorpay) arrives in Milestone 5!")}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg"
-                >
-                  Pay Now <ArrowRight size={18} />
-                </button>
+                paymentStatus?.paid ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-green-400 font-bold">
+                      <CheckCircle size={18} className="fill-green-400/20" />
+                      Payment Complete
+                    </div>
+                    <button
+                      onClick={handleDownloadInvoice}
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all"
+                    >
+                      <FileText size={18} /> Download Invoice
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handlePayNow}
+                    disabled={payLoading}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-60"
+                  >
+                    {payLoading ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Processing...</>
+                    ) : (
+                      <>Pay Now <ArrowRight size={18} /></>
+                    )}
+                  </button>
+                )
               ) : (
                 <div className="text-center p-3 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-400">
                   Payment becomes available once the service is completed.

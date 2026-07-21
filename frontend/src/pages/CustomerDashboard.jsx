@@ -6,7 +6,7 @@ import api from '../services/api';
 import {
   CalendarDays, ClipboardList, Star, Zap, LogOut,
   PlusCircle, Clock, CheckCircle2, XCircle, Wrench,
-  ChevronRight, User, Sparkles, Home
+  ChevronRight, User, Sparkles, Home, CreditCard, FileText
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -33,14 +33,35 @@ export default function CustomerDashboard() {
   const navigate = useNavigate();
   const { user } = useSelector((s) => s.auth);
   const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('bookings');
 
   useEffect(() => {
-    api.get('/bookings/')
-      .then((r) => setBookings(r.data || []))
-      .catch(() => setBookings([]))
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get('/bookings/').catch(() => ({ data: [] })),
+      api.get('/payments/history').catch(() => ({ data: [] }))
+    ]).then(([bRes, pRes]) => {
+      setBookings(bRes.data || []);
+      setPayments(pRes.data || []);
+    }).finally(() => setLoading(false));
   }, []);
+
+  const handleDownloadInvoice = async (bookingId) => {
+    try {
+      const response = await api.get(`/payments/${bookingId}/invoice`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `gharseva-invoice-${bookingId.slice(0, 8)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to download invoice.');
+    }
+  };
 
   const stats = {
     total:     bookings.length,
@@ -118,64 +139,143 @@ export default function CustomerDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Bookings List */}
-          <div className="lg:col-span-2 rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-amber-400" />
-                <span className="font-semibold text-sm">My Bookings</span>
-              </div>
-              {bookings.length > 0 && (
-                <span className="text-xs text-slate-500">{bookings.length} total</span>
-              )}
+          <div className="lg:col-span-2 space-y-4">
+
+            {/* Tabs */}
+            <div className="flex items-center gap-6 border-b border-slate-800 pb-2">
+              <button
+                onClick={() => setActiveTab('bookings')}
+                className={`font-semibold text-sm pb-2 border-b-2 transition-colors ${activeTab === 'bookings' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+              >
+                My Bookings
+              </button>
+              <button
+                onClick={() => setActiveTab('payments')}
+                className={`font-semibold text-sm pb-2 border-b-2 transition-colors ${activeTab === 'payments' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+              >
+                Payment History
+              </button>
             </div>
 
-            {loading ? (
-              <div className="p-10 text-center">
-                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-xs text-slate-500">Loading bookings…</p>
-              </div>
-            ) : bookings.length === 0 ? (
-              <div className="p-10 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto mb-4">
-                  <ClipboardList className="w-7 h-7 text-slate-600" />
+            {/* Bookings List */}
+            {activeTab === 'bookings' && (
+              <div className="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-amber-400" />
+                    <span className="font-semibold text-sm">My Bookings</span>
+                  </div>
+                  {bookings.length > 0 && (
+                    <span className="text-xs text-slate-500">{bookings.length} total</span>
+                  )}
                 </div>
-                <p className="text-sm font-semibold text-slate-400">No bookings yet</p>
-                <p className="text-xs text-slate-600 mt-1">Browse services and book your first professional</p>
-                <button
-                  onClick={() => navigate('/')}
-                  className="mt-4 px-4 py-2 rounded-xl bg-amber-400/10 border border-amber-400/20 text-amber-400 text-xs font-semibold hover:bg-amber-400/20 transition"
-                >
-                  Browse Services
-                </button>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-800/50">
-                {bookings.map((b) => {
-                  const cfg = STATUS_CONFIG[b.status] || STATUS_CONFIG.pending;
-                  const Icon = cfg.icon;
-                  return (
-                    <div key={b.booking_id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-800/20 transition group">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center`}>
-                          <Icon className={`w-4 h-4 ${cfg.color}`} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold">{b.service_name || 'Service Booking'}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {b.scheduled_at ? new Date(b.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Schedule TBD'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
-                          {cfg.label}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition" />
-                      </div>
+
+                {loading ? (
+                  <div className="p-10 text-center">
+                    <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-xs text-slate-500">Loading bookings…</p>
+                  </div>
+                ) : bookings.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto mb-4">
+                      <ClipboardList className="w-7 h-7 text-slate-600" />
                     </div>
-                  );
-                })}
+                    <p className="text-sm font-semibold text-slate-400">No bookings yet</p>
+                    <p className="text-xs text-slate-600 mt-1">Browse services and book your first professional</p>
+                    <button
+                      onClick={() => navigate('/')}
+                      className="mt-4 px-4 py-2 rounded-xl bg-amber-400/10 border border-amber-400/20 text-amber-400 text-xs font-semibold hover:bg-amber-400/20 transition"
+                    >
+                      Browse Services
+                    </button>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/50">
+                    {bookings.map((b) => {
+                      const cfg = STATUS_CONFIG[b.status] || STATUS_CONFIG.pending;
+                      const Icon = cfg.icon;
+                      return (
+                        <div
+                          key={b.booking_id}
+                          onClick={() => navigate(`/booking/${b.booking_id}`)}
+                          className="px-6 py-4 flex items-center justify-between hover:bg-slate-800/20 transition group cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center`}>
+                              <Icon className={`w-4 h-4 ${cfg.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold">{b.service_name || 'Service Booking'}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {b.scheduled_at ? new Date(b.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Schedule TBD'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
+                              {cfg.label}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Payment History */}
+            {activeTab === 'payments' && (
+              <div className="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-amber-400" />
+                  <span className="font-semibold text-sm">Payment History</span>
+                </div>
+                {payments.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <CreditCard className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-slate-400">No payments yet</p>
+                    <p className="text-xs text-slate-600 mt-1">Completed bookings will show payment history here</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/50">
+                    {payments.map(p => (
+                      <div key={p.payment_id} className="px-6 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                            p.status === 'captured' ? 'bg-emerald-400/10' : 'bg-amber-400/10'
+                          }`}>
+                            {p.status === 'captured'
+                              ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                              : <CreditCard className="w-4 h-4 text-amber-400" />
+                            }
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold">₹{p.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{new Date(p.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                            p.status === 'captured' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-amber-400/10 text-amber-400'
+                          }`}>
+                            {p.status === 'captured' ? 'PAID' : p.status.toUpperCase()}
+                          </span>
+                          {p.status === 'captured' && (
+                            <button
+                              onClick={() => handleDownloadInvoice(p.booking_id)}
+                              title="Download Invoice"
+                              className="w-8 h-8 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 flex items-center justify-center transition"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-amber-400" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

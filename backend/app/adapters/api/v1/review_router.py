@@ -6,7 +6,7 @@ from app.adapters.api.dependencies import get_current_user, get_review_repositor
 from app.adapters.database.sqlalchemy_models import User
 from app.domain.protocols.review_repo import ReviewRepository
 from app.domain.protocols.booking_repo import BookingRepository
-from app.domain.protocols.provider_repo import ProviderRepository
+from app.domain.protocols.provider_repo import ProviderRepo as ProviderRepository
 
 from app.use_cases.review.submit_review import SubmitReviewUseCase, SubmitReviewInput
 from app.use_cases.review.reply_to_review import ReplyToReviewUseCase, ReplyReviewInput

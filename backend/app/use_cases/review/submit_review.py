@@ -4,7 +4,7 @@ from uuid import UUID
 
 from app.domain.protocols.review_repo import ReviewRepository
 from app.domain.protocols.booking_repo import BookingRepository
-from app.domain.protocols.provider_repo import ProviderRepository
+from app.domain.protocols.provider_repo import ProviderRepo as ProviderRepository
 from app.adapters.database.sqlalchemy_models import Review, User
 
 class SubmitReviewInput(BaseModel):

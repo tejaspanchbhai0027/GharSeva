@@ -28,6 +28,7 @@ class ProviderRepository(ProviderRepo):
         experience_min: Optional[int] = None,
         rating_min: Optional[float] = None,
         search: Optional[str] = None,
+        verification_status: Optional[str] = None,
         sort_by: str = "rating",
         sort_order: str = "desc",
         limit: int = 10,
@@ -36,11 +37,15 @@ class ProviderRepository(ProviderRepo):
         from sqlalchemy import or_, desc, asc
 
         query = self.db.query(ServiceProvider).join(User, User.user_id == ServiceProvider.user_id)
-        # Only active users who are verified providers
-        query = query.filter(
-            User.is_active == True,
-            ServiceProvider.verification_status == "approved"
-        )
+        
+        if verification_status:
+            query = query.filter(ServiceProvider.verification_status == verification_status)
+        else:
+            # Only active users who are verified providers by default
+            query = query.filter(
+                User.is_active == True,
+                ServiceProvider.verification_status == "approved"
+            )
 
         if category_id:
             query = query.join(ProviderService, ProviderService.provider_id == ServiceProvider.provider_id) \

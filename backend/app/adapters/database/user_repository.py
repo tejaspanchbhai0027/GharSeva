@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List, Any
 from uuid import UUID
 from sqlalchemy.orm import Session
 from app.domain.protocols.user_repo import UserRepo
@@ -58,8 +58,31 @@ class UserRepository(UserRepo):
         from app.adapters.database.sqlalchemy_models import Address
         return self.db.query(Address).filter(Address.user_id == user_id).order_by(Address.created_at.desc()).all()
 
-    def create_address(self, address) -> any:
+    def create_address(self, address: Any) -> Any:
         self.db.add(address)
         self.db.commit()
         self.db.refresh(address)
         return address
+
+    def list_users(
+        self,
+        search: Optional[str] = None,
+        role: Optional[str] = None,
+        is_active: Optional[bool] = None,
+        limit: int = 20,
+        offset: int = 0
+    ) -> tuple[List[User], int]:
+        query = self.db.query(User)
+
+        if search:
+            query = query.filter(User.full_name.ilike(f"%{search}%") | User.email.ilike(f"%{search}%"))
+        
+        if role:
+            query = query.filter(User.role == role)
+            
+        if is_active is not None:
+            query = query.filter(User.is_active == is_active)
+            
+        total = query.count()
+        users = query.order_by(User.created_at.desc()).offset(offset).limit(limit).all()
+        return users, total

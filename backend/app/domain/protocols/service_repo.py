@@ -20,3 +20,11 @@ class ServiceRepository(Protocol):
     def get_service_by_id(self, service_id: str) -> Optional[Service]:
         """Fetch a single service by ID."""
         ...
+
+    def create_category(self, category: ServiceCategory) -> ServiceCategory:
+        """Create a new service category."""
+        ...
+
+    def create_service(self, service: Service) -> Service:
+        """Create a new service."""
+        ...

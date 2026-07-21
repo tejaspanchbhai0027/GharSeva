@@ -17,6 +17,10 @@ from app.adapters.database.booking_repository import SQLAlchemyBookingRepository
 from app.domain.protocols.booking_repo import BookingRepository
 from app.domain.protocols.review_repo import ReviewRepository
 from app.adapters.database.review_repository import SQLAlchemyReviewRepository
+from app.domain.protocols.payment_repo import PaymentRepository
+from app.adapters.database.payment_repository import SQLAlchemyPaymentRepository
+from app.adapters.database.dispute_repository import DisputeRepository
+from app.domain.protocols.dispute_repo import DisputeRepo
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -34,6 +38,12 @@ def get_booking_repository(db: Session = Depends(get_db)) -> BookingRepository:
 
 def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
     return SQLAlchemyReviewRepository(db)
+
+def get_payment_repository(db: Session = Depends(get_db)) -> PaymentRepository:
+    return SQLAlchemyPaymentRepository(db)
+
+def get_dispute_repository(db: Session = Depends(get_db)) -> DisputeRepo:
+    return DisputeRepository(db)
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),

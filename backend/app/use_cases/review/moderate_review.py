@@ -3,7 +3,7 @@ from typing import Dict, Any
 from uuid import UUID
 
 from app.domain.protocols.review_repo import ReviewRepository
-from app.domain.protocols.provider_repo import ProviderRepository
+from app.domain.protocols.provider_repo import ProviderRepo as ProviderRepository
 from app.adapters.database.sqlalchemy_models import User
 
 class ModerateReviewInput(BaseModel):

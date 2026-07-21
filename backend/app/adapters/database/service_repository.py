@@ -47,3 +47,15 @@ class SQLAlchemyServiceRepository(ServiceRepository):
 
     def get_service_by_id(self, service_id: str) -> Optional[Service]:
         return self.session.query(Service).filter(Service.service_id == service_id).first()
+
+    def create_category(self, category: ServiceCategory) -> ServiceCategory:
+        self.session.add(category)
+        self.session.commit()
+        self.session.refresh(category)
+        return category
+
+    def create_service(self, service: Service) -> Service:
+        self.session.add(service)
+        self.session.commit()
+        self.session.refresh(service)
+        return service

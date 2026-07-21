@@ -10,10 +10,7 @@ class ListBookingsUseCase:
         if current_user.role == "customer":
             bookings = self.booking_repo.list_bookings_by_customer(current_user.user_id)
         elif current_user.role == "provider":
-            # For simplicity assuming provider user has a provider_id mapping or using user_id if they are aligned
-            # Usually we'd need to look up provider_id from user_id, let's assume we fetch by user_id mapped to provider
-            # This logic needs refinement based on actual Provider fetching, but for MVP:
-            bookings = self.booking_repo.list_bookings_by_provider(current_user.user_id) # Needs adjustment in repo or here
+            bookings = self.booking_repo.list_bookings_by_provider(current_user.user_id)
         else:
             bookings = []
             

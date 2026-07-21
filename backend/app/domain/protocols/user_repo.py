@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Any
+from typing import Optional, Any, List
 from uuid import UUID
 from app.adapters.database.sqlalchemy_models import User, OTPToken, ServiceProvider
 
@@ -42,4 +42,15 @@ class UserRepo(ABC):
 
     @abstractmethod
     def create_address(self, address: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def list_users(
+        self,
+        search: Optional[str] = None,
+        role: Optional[str] = None,
+        is_active: Optional[bool] = None,
+        limit: int = 20,
+        offset: int = 0
+    ) -> tuple[List[User], int]:
         pass

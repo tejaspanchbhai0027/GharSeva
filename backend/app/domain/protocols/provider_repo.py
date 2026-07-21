@@ -23,6 +23,7 @@ class ProviderRepo(ABC):
         experience_min: Optional[int] = None,
         rating_min: Optional[float] = None,
         search: Optional[str] = None,
+        verification_status: Optional[str] = None,
         sort_by: str = "rating",
         sort_order: str = "desc",
         limit: int = 10,
